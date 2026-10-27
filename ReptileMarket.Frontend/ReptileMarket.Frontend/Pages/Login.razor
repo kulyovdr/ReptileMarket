@@ -1,0 +1,28 @@
+@page "/login"
+
+<PageTitle>Вход — ReptileMarket</PageTitle>
+
+<AuthCard Title="Войти в аккаунт">
+    <form class="auth-form" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+        <div class="form-field">
+            <label for="login-identifier">Логин/Почта</label>
+            <input id="login-identifier" type="text" @bind="Identifier" autocomplete="username" />
+        </div>
+
+        <div class="form-field">
+            <label for="login-password">Пароль</label>
+            <input id="login-password" type="password" @bind="Password" autocomplete="current-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">Войти</button>
+    </form>
+</AuthCard>
+
+@code {
+    private string Identifier { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+
+    private void HandleSubmit()
+    {
+    }
+}

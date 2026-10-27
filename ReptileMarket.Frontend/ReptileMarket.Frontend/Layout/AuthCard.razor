@@ -1,0 +1,14 @@
+<div class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-title">@Title</h1>
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

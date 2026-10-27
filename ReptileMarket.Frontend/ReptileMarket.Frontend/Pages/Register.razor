@@ -1,0 +1,44 @@
+@page "/register"
+
+<PageTitle>Регистрация — ReptileMarket</PageTitle>
+
+<AuthCard Title="Создать аккаунт">
+    <form class="auth-form" @onsubmit="HandleSubmit" @onsubmit:preventDefault>
+        <div class="form-field">
+            <label for="register-display-name">Имя пользователя</label>
+            <input id="register-display-name" type="text" @bind="DisplayName" autocomplete="name" />
+        </div>
+
+        <div class="form-field">
+            <label for="register-login">Логин</label>
+            <input id="register-login" type="text" @bind="Login" autocomplete="username" />
+        </div>
+
+        <div class="form-field">
+            <label for="register-email">Почта</label>
+            <input id="register-email" type="email" @bind="Email" autocomplete="email" />
+        </div>
+
+        <div class="form-field">
+            <label for="register-password">Пароль</label>
+            <input id="register-password" type="password" @bind="Password" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary auth-submit">Регистрироваться</button>
+
+        <p class="auth-switch">
+            У вас есть аккаунт? <a class="auth-switch-link" href="/login">Войти</a>
+        </p>
+    </form>
+</AuthCard>
+
+@code {
+    private string DisplayName { get; set; } = string.Empty;
+    private string Login { get; set; } = string.Empty;
+    private string Email { get; set; } = string.Empty;
+    private string Password { get; set; } = string.Empty;
+
+    private void HandleSubmit()
+    {
+    }
+}
