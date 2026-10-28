@@ -1,4 +1,6 @@
 @page "/login"
+@inject AccountState Account
+@inject NavigationManager Navigation
 
 <PageTitle>Вход — ReptileMarket</PageTitle>
 
@@ -24,5 +26,7 @@
 
     private void HandleSubmit()
     {
+        Account.Login(string.IsNullOrWhiteSpace(Identifier) ? "Гость" : Identifier);
+        Navigation.NavigateTo("/");
     }
 }

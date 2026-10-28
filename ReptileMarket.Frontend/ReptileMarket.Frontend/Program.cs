@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using ReptileMarket.Frontend.Services;
 
 namespace ReptileMarket.Frontend
 {
@@ -12,6 +13,7 @@ namespace ReptileMarket.Frontend
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton<AccountState>();
 
             await builder.Build().RunAsync();
         }

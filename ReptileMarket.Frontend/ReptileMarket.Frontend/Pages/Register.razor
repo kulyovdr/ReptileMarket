@@ -1,4 +1,6 @@
 @page "/register"
+@inject AccountState Account
+@inject NavigationManager Navigation
 
 <PageTitle>Регистрация — ReptileMarket</PageTitle>
 
@@ -40,5 +42,8 @@
 
     private void HandleSubmit()
     {
+        var name = !string.IsNullOrWhiteSpace(DisplayName) ? DisplayName : Login;
+        Account.Login(string.IsNullOrWhiteSpace(name) ? "Гость" : name);
+        Navigation.NavigateTo("/");
     }
 }

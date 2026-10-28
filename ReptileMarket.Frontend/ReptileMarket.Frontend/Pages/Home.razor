@@ -1,3 +1,63 @@
 ﻿@page "/"
 
 <PageTitle>ReptileMarket</PageTitle>
+
+<section class="home-hero">
+    <div class="hero-text">
+        <h1 class="hero-title">Откройте мир рептилий<br />в один клик</h1>
+        <a class="btn btn-outline hero-btn" href="/catalog">Смотреть каталог</a>
+    </div>
+    <div class="hero-image" role="img" aria-label="Геккон на ладони"></div>
+</section>
+
+<section class="home-categories">
+    <div class="section-inner">
+        <h2 class="section-title">Категории</h2>
+
+        <div class="cat-grid">
+            @foreach (var category in VisibleCategories)
+            {
+                <a class="cat-card" href="/category/@category.Slug">
+                    <div class="cat-photo"></div>
+                    <span class="cat-name">@category.Name</span>
+                </a>
+            }
+        </div>
+
+        <div class="cat-more">
+            <button class="btn btn-outline" type="button" @onclick="ToggleCategories">
+                @(Expanded ? "Свернуть" : "Смотреть категории")
+            </button>
+        </div>
+    </div>
+</section>
+
+@code {
+    private record Category(string Name, string Slug);
+
+    private bool Expanded { get; set; }
+
+    private IEnumerable<Category> VisibleCategories =>
+        Expanded ? Categories : Categories.Take(4);
+
+    private void ToggleCategories()
+    {
+        Expanded = !Expanded;
+    }
+
+    private static readonly Category[] Categories =
+    [
+        new("Гемитеконникс", "hemidactylus"),
+        new("Эублефар", "eublepharis"),
+        new("Бананоед", "correlophus"),
+        new("Фельзума", "fehsuma"),
+        new("Королевский питон", "royal-python"),
+        new("Бородатая агама", "bearded-dragon"),
+        new("Маисовый полоз", "corn-snake"),
+        new("Йеменский хамелеон", "yemen-chameleon"),
+        new("Королевская змея", "king-snake"),
+        new("Токи", "tokay"),
+        new("Нефрус", "nephrus"),
+        new("Черепахи", "turtles")
+    ];
+}

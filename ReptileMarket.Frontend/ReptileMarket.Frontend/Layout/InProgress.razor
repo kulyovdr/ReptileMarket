@@ -1,0 +1,10 @@
+<div class="catalog-page">
+    <h1 class="catalog-title">@Title</h1>
+
+    <p class="catalog-progress">В разработке...</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+}

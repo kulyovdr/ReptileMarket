@@ -38,8 +38,7 @@
               "RelativeToolTip": "ReptileMarket.Frontend\\App.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:47:19.582Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-27T16:47:19.582Z"
             },
             {
               "$type": "Document",
@@ -49,7 +48,7 @@
               "RelativeDocumentMoniker": "ReptileMarket.Frontend\\Pages\\Register.razor",
               "ToolTip": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Register.razor",
               "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Register.razor",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABEAAAAYAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2026-10-27T16:46:54.422Z",
               "EditorCaption": ""
@@ -64,8 +63,7 @@
               "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Login.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:46:52.348Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-27T16:46:52.348Z"
             },
             {
               "$type": "Document",
@@ -77,8 +75,7 @@
               "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Home.razor",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:46:50.262Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-27T16:46:50.262Z"
             }
           ]
         }
