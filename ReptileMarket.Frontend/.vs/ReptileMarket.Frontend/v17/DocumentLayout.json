@@ -1,85 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|d:\\reptilemarketproject\\reptilemarket.frontend\\reptilemarket.frontend\\pages\\register.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|solutionrelative:reptilemarket.frontend\\pages\\register.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|d:\\reptilemarketproject\\reptilemarket.frontend\\reptilemarket.frontend\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|solutionrelative:reptilemarket.frontend\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|d:\\reptilemarketproject\\reptilemarket.frontend\\reptilemarket.frontend\\pages\\login.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|solutionrelative:reptilemarket.frontend\\pages\\login.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|d:\\reptilemarketproject\\reptilemarket.frontend\\reptilemarket.frontend\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{7385A495-8391-403C-8046-D175867323E6}|ReptileMarket.Frontend\\ReptileMarket.Frontend.csproj|solutionrelative:reptilemarket.frontend\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 1,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "App.razor",
-              "DocumentMoniker": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\App.razor",
-              "RelativeDocumentMoniker": "ReptileMarket.Frontend\\App.razor",
-              "ToolTip": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\App.razor",
-              "RelativeToolTip": "ReptileMarket.Frontend\\App.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:47:19.582Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Register.razor",
-              "DocumentMoniker": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Register.razor",
-              "RelativeDocumentMoniker": "ReptileMarket.Frontend\\Pages\\Register.razor",
-              "ToolTip": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Register.razor",
-              "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Register.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:46:54.422Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Login.razor",
-              "DocumentMoniker": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Login.razor",
-              "RelativeDocumentMoniker": "ReptileMarket.Frontend\\Pages\\Login.razor",
-              "ToolTip": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Login.razor",
-              "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Login.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:46:52.348Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "Home.razor",
-              "DocumentMoniker": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Home.razor",
-              "RelativeDocumentMoniker": "ReptileMarket.Frontend\\Pages\\Home.razor",
-              "ToolTip": "D:\\ReptileMarketProject\\ReptileMarket.Frontend\\ReptileMarket.Frontend\\Pages\\Home.razor",
-              "RelativeToolTip": "ReptileMarket.Frontend\\Pages\\Home.razor",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-10-27T16:46:50.262Z"
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }

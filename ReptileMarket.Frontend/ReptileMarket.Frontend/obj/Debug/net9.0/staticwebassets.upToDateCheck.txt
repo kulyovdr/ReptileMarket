@@ -3,5 +3,5 @@ wwwroot\css\site.css
 wwwroot\icon-192.png
 wwwroot\index.html
 D:\ReptileMarketProject\ReptileMarket.Frontend\ReptileMarket.Frontend\wwwroot\css\app.css
-D:\ReptileMarketProject\ReptileMarket.Frontend\ReptileMarket.Frontend\wwwroot\css\site.css
 D:\ReptileMarketProject\ReptileMarket.Frontend\ReptileMarket.Frontend\wwwroot\index.html
+D:\ReptileMarketProject\ReptileMarket.Frontend\ReptileMarket.Frontend\wwwroot\css\site.css
