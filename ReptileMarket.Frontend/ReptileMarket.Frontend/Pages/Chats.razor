@@ -1,0 +1,88 @@
+@page "/chats"
+@implements IDisposable
+@inject AccountState Account
+@inject ChatStore Store
+@inject NavigationManager Navigation
+
+<PageTitle>Чаты — ReptileMarket</PageTitle>
+
+<div class="catalog-page">
+    <div class="products-toolbar">
+        <h1 class="products-title">Чаты</h1>
+    </div>
+
+    @if (Store.Chats.Count == 0)
+    {
+        <p class="empty-state">
+            У вас пока нет чатов. <a class="empty-state-link" href="/catalog">Перейти в каталог</a>
+        </p>
+    }
+    else
+    {
+        <div class="chats-card">
+            @foreach (var chat in Sorted)
+            {
+                var last = chat.Messages.Count > 0 ? chat.Messages[^1] : null;
+                <button class="chat-row" type="button" @onclick='() => Navigation.NavigateTo($"/chats/{chat.Id}")'>
+                    <span class="chat-avatar" aria-hidden="true">@(chat.SellerName.Length > 0 ? chat.SellerName[..1].ToUpperInvariant() : "?")</span>
+                    <span class="chat-row-main">
+                        <span class="chat-row-name">@chat.SellerName</span>
+                        <span class="chat-row-preview">
+                            @if (last is null)
+                            {
+                                <span class="chat-row-preview-empty">Нет сообщений</span>
+                            }
+                            else
+                            {
+                                @if (last.FromMe)
+                                {
+                                    <span class="chat-row-preview-me">Вы:</span>
+                                }
+                                <span class="chat-row-preview-text">@last.Text</span>
+                            }
+                        </span>
+                    </span>
+                    <span class="chat-row-aside">
+                        @if (last is not null)
+                        {
+                            <span class="chat-row-time">@ChatFormat.Time(last.Time)</span>
+                        }
+                        <span class="chat-row-species">@chat.Species</span>
+                    </span>
+                </button>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Chat> Sorted = [];
+
+    protected override void OnInitialized()
+    {
+        if (!Account.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Refresh();
+        Store.Changed += OnStoreChanged;
+    }
+
+    private void Refresh()
+    {
+        Sorted = [.. Store.Chats.OrderByDescending(c => c.Messages.Count > 0 ? c.Messages[^1].Time : DateTime.MinValue)];
+    }
+
+    private void OnStoreChanged()
+    {
+        Refresh();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+    }
+}

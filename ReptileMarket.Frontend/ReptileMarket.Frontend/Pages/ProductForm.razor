@@ -1,18 +1,25 @@
 @page "/create-product"
 @page "/edit-product/{Id:int}"
+@implements IAsyncDisposable
+@using System.Globalization
 @inject AccountState Account
+@inject ProductStore Store
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>@(IsEdit ? "Редактирование товара" : "Новый товар") — ReptileMarket</PageTitle>
 
 <div class="pform">
     <div class="pform-card">
-        <button class="pform-back" type="button" aria-label="Назад" @onclick="GoBack">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12" />
-                <polyline points="12 19 5 12 12 5" />
-            </svg>
-        </button>
+        <div class="pform-topbar">
+            <button class="pform-back" type="button" aria-label="Назад" @onclick="GoBack">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                </svg>
+            </button>
+            <h1 class="pform-title">@(IsEdit ? "Редактирование товара" : "Новый товар")</h1>
+        </div>
 
         <div class="pform-top">
             <div class="pform-photo">
@@ -35,7 +42,7 @@
                 </div>
 
                 <button class="pform-photo-remove" type="button" aria-label="Удалить фото" @onclick="RemovePhoto">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="3 6 5 6 21 6" />
                         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                         <path d="M10 11v6" />
@@ -55,50 +62,165 @@
             <div class="pform-fields">
                 <label class="pfield">
                     <span>Цена</span>
-                    <input class="pform-control" type="number" min="0" @bind="Price" />
+                    <div class="pform-price">
+                        <input class="pform-control" type="number" min="0" @bind="Price" />
+                        <span class="pform-price-cur">₽</span>
+                    </div>
                 </label>
+                <div class="pfield pfield-addr">
+                    <span>Адрес</span>
+                    <div class="pform-addr">
+                        <input class="pform-control" type="text" placeholder="Город, улица, дом" @bind="Address" />
+                        <button class="pform-addr-btn" type="button" title="Указать на карте" aria-label="Указать на карте" @onclick="OpenMap">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pform-sep" />
+
                 <label class="pfield">
-                    <span>Город</span>
-                    <select class="pform-control" @bind="City">
+                    <span>Вид</span>
+                    <select class="pform-control" @bind="Species" @bind:after="OnSpeciesChanged">
                         <option value="">Выберите</option>
-                        @foreach (var city in Cities)
+                        @foreach (var species in SpeciesList)
                         {
-                            <option value="@city">@city</option>
+                            <option value="@species">@species</option>
                         }
                     </select>
                 </label>
                 <label class="pfield">
-                    <span>Пол</span>
-                    <select class="pform-control" @bind="Sex">
-                        <option value="">Выберите</option>
-                        <option value="male">Самец</option>
-                        <option value="female">Самка</option>
+                    <span>Питание</span>
+                    <select class="pform-control" @bind="Diet" disabled="@(DietOptions is null)">
+                        <option value="">@(DietOptions is null ? "Сначала выберите вид" : "Выберите")</option>
+                        @if (DietOptions is not null)
+                        {
+                            @foreach (var option in DietOptions)
+                            {
+                                <option value="@option">@option</option>
+                            }
+                        }
                     </select>
                 </label>
                 <label class="pfield">
+                    <span>Морфа</span>
+                    <input class="pform-control" type="text" @bind="Morph" />
+                </label>
+                <div class="pfield">
                     <span>Возраст</span>
-                    <input class="pform-control" type="text" @bind="Age" />
+                    <div class="age-row">
+                        <div class="datepick">
+                            <button type="button" class="pform-control datepick-btn" @onclick="ToggleCalendar">
+                                <span class="@(HatchDate.HasValue ? "" : "datepick-empty")">@(HatchDate?.ToString("dd.MM.yyyy") ?? "дд.мм.гггг")</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                            </button>
+                            @if (_calOpen)
+                            {
+                                <div class="datepick-overlay" @onclick="CloseCalendar"></div>
+                                <div class="datepick-pop">
+                                    <div class="dp-head">
+                                        <span class="dp-title">@($"{_calView.ToString("MMMM", Ru)} {_calView.Year}")</span>
+                                        <div class="dp-nav">
+                                            <button type="button" aria-label="Предыдущий месяц" @onclick="PrevMonth">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15" /></svg>
+                                            </button>
+                                            <button type="button" aria-label="Следующий месяц" @onclick="NextMonth">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="dp-grid dp-week">
+                                        @foreach (var wd in WeekDays)
+                                        {
+                                            <span>@wd</span>
+                                        }
+                                    </div>
+                                    <div class="dp-grid">
+                                        @for (var b = 0; b < LeadingBlanks(); b++)
+                                        {
+                                            <span class="dp-blank"></span>
+                                        }
+                                        @for (var d = 1; d <= DateTime.DaysInMonth(_calView.Year, _calView.Month); d++)
+                                        {
+                                            var day = d;
+                                            var date = new DateTime(_calView.Year, _calView.Month, day);
+                                            var cls = date.Date > DateTime.Today ? "future" : "";
+                                            if (HatchDate?.Date == date) { cls += " selected"; }
+                                            else if (date.Date == DateTime.Today) { cls += " today"; }
+                                            <button type="button" class="@cls" disabled="@(date.Date > DateTime.Today)"
+                                                    @onclick="() => PickDay(day)">@day</button>
+                                        }
+                                    </div>
+                                    <div class="dp-foot">
+                                        <button type="button" class="dp-link" @onclick="ClearDate">Очистить</button>
+                                        <button type="button" class="dp-link" @onclick="PickToday">Сегодня</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <label class="age-approx" title="Дата известна приблизительно">
+                            <input type="checkbox" @bind="HatchApprox" />
+                            ≈
+                        </label>
+                    </div>
+                </div>
+                <label class="pfield">
+                    <span>Пол</span>
+                    <select class="pform-control pform-sex" @bind="Sex">
+                        <option value="">Выберите</option>
+                        <option value="male">Самец</option>
+                        <option value="female">Самка</option>
+                        <option value="incubation-female">Инкубация под самку</option>
+                        <option value="incubation-male">Инкубация под самца</option>
+                        <option value="unknown">Неопределённо</option>
+                    </select>
+                </label>
+
+                <div class="pform-sep" />
+
+                <label class="pfield">
+                    <span>Разведение</span>
+                    <select class="pform-control" @bind="Breeding">
+                        <option value="">Выберите</option>
+                        <option value="Собственное">Собственное</option>
+                        <option value="Несобственное">Несобственное</option>
+                    </select>
+                </label>
+                <label class="pfield">
+                    <span>Отправка</span>
+                    <select class="pform-control" @bind="Shipping">
+                        <option value="">Выберите</option>
+                        <option value="Есть отправка">Есть отправка</option>
+                        <option value="Только самовывоз">Только самовывоз</option>
+                    </select>
+                </label>
+                <label class="pfield">
+                    <span>Обмен</span>
+                    <select class="pform-control" @bind="Exchange">
+                        <option value="">Выберите</option>
+                        <option value="Есть">Есть</option>
+                        <option value="Нет">Нет</option>
+                    </select>
+                </label>
+                <label class="pfield">
+                    <span>Вес</span>
+                    <div class="pform-price">
+                        <input class="pform-control" type="text" maxlength="20" placeholder="напр. 45" @bind="Weight" />
+                        <span class="pform-price-cur">г</span>
+                    </div>
                 </label>
             </div>
         </div>
 
-        <label class="pfield pfield-wide">
-            <span>Вид</span>
-            <select class="pform-control" @bind="Species">
-                <option value="">Выберите</option>
-                @foreach (var species in SpeciesList)
-                {
-                    <option value="@species">@species</option>
-                }
-            </select>
-        </label>
-
-        <label class="pfield pfield-wide">
-            <span>Морфа</span>
-            <input class="pform-control" type="text" @bind="Morph" />
-        </label>
-
-        <textarea class="pform-description" placeholder="Описание" @bind="Description"></textarea>
+        <textarea class="pform-description" placeholder="Прочие подробности" @bind="Description"></textarea>
 
         <div class="pform-actions">
             <button class="btn btn-outline" type="button" @onclick="OnSave">Сохранить</button>
@@ -109,6 +231,27 @@
         </div>
     </div>
 </div>
+
+@if (MapOpen)
+{
+    <div class="addr-modal" @onclick="CloseMap">
+        <div class="addr-card" @onclick:stopPropagation="true">
+            <div class="addr-head">
+                <span>Отметьте местоположение</span>
+                <button class="addr-close" type="button" aria-label="Закрыть" @onclick="CloseMap">&times;</button>
+            </div>
+            <form class="addr-search" @onsubmit="OnSearch" @onsubmit:preventDefault>
+                <input class="pform-control" type="text" placeholder="Город, улица, дом — например: Москва, Тверская, 1" @bind="SearchQuery" />
+                <button class="btn btn-outline" type="submit">Найти</button>
+            </form>
+            <div id="reptile-address-map" class="addr-map"></div>
+            <div class="addr-foot">
+                <span class="addr-hint">@MapHint</span>
+                <button class="btn btn-primary" type="button" @onclick="CloseMap">Готово</button>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
@@ -134,14 +277,81 @@
     }
 
     private int? Price { get; set; }
-    private string City { get; set; } = string.Empty;
+    private string Address { get; set; } = string.Empty;
     private string Sex { get; set; } = string.Empty;
-    private string Age { get; set; } = string.Empty;
     private string Species { get; set; } = string.Empty;
     private string Morph { get; set; } = string.Empty;
     private string Description { get; set; } = string.Empty;
 
-    private static readonly string[] Cities = ["Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск", "Краснодар"];
+    private string Diet { get; set; } = string.Empty;
+    private string Breeding { get; set; } = string.Empty;
+    private string Shipping { get; set; } = string.Empty;
+    private string Exchange { get; set; } = string.Empty;
+    private string Weight { get; set; } = string.Empty;
+
+    private DateTime? HatchDate { get; set; }
+    private bool HatchApprox;
+
+    private bool _calOpen;
+    private DateTime _calView = DateTime.Today;
+    private static readonly CultureInfo Ru = CultureInfo.GetCultureInfo("ru-RU");
+    private static readonly string[] WeekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+    private void ToggleCalendar()
+    {
+        if (!_calOpen)
+        {
+            _calView = HatchDate ?? DateTime.Today;
+        }
+        _calOpen = !_calOpen;
+    }
+
+    private void CloseCalendar()
+    {
+        _calOpen = false;
+    }
+
+    private void PrevMonth()
+    {
+        _calView = _calView.AddMonths(-1);
+    }
+
+    private void NextMonth()
+    {
+        _calView = _calView.AddMonths(1);
+    }
+
+    private int LeadingBlanks()
+    {
+        return ((int)new DateTime(_calView.Year, _calView.Month, 1).DayOfWeek + 6) % 7;
+    }
+
+    private void PickDay(int day)
+    {
+        HatchDate = new DateTime(_calView.Year, _calView.Month, day);
+        _calOpen = false;
+    }
+
+    private void ClearDate()
+    {
+        HatchDate = null;
+        _calOpen = false;
+    }
+
+    private void PickToday()
+    {
+        HatchDate = DateTime.Today;
+        _calView = DateTime.Today;
+        _calOpen = false;
+    }
+
+    private bool MapOpen;
+    private string SearchQuery { get; set; } = string.Empty;
+    private string MapHint = "Кликните по карте или перетащите метку";
+    private double _pickedLat;
+    private double _pickedLon;
+    private bool _mapPending;
+    private DotNetObjectReference<ProductForm>? _selfRef;
 
     private static readonly string[] SpeciesList =
     [
@@ -150,13 +360,105 @@
         "Токи", "Нефрус", "Черепахи"
     ];
 
+    private static readonly string[] SnakeSpecies = ["Королевский питон", "Маисовый полоз", "Королевская змея"];
+    private static readonly string[] LizardSpecies = ["Гемитеконникс", "Эублефар", "Бананоед", "Фельзума", "Бородатая агама", "Йеменский хамелеон", "Токи", "Нефрус"];
+    private static readonly string[] SnakeDiets = ["Птица", "Крыса", "Мышь", "Другое"];
+    private static readonly string[] LizardDiets = ["Насекомые", "Пюре"];
+
+    private string[]? DietOptions => Species switch
+    {
+        var s when SnakeSpecies.Contains(s) => SnakeDiets,
+        var s when LizardSpecies.Contains(s) => LizardDiets,
+        _ => null
+    };
+
+    private void OnSpeciesChanged()
+    {
+        if (Diet.Length > 0 && DietOptions?.Contains(Diet) != true)
+        {
+            Diet = string.Empty;
+        }
+    }
+
     protected override void OnInitialized()
     {
         if (!Account.IsLoggedIn)
         {
             Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (IsEdit)
+        {
+            var product = Store.Get(Id!.Value);
+            if (product is null)
+            {
+                Navigation.NavigateTo("/my-products");
+                return;
+            }
+
+            Price = product.Price;
+            Address = product.Address;
+            Species = product.Species;
+            Morph = product.Morph;
+            Description = product.Description;
+            HatchDate = product.HatchDate;
+            Sex = SexCodeFromLabel(product.Sex);
+            Diet = product.Diet ?? string.Empty;
+            Breeding = product.Breeding ?? string.Empty;
+            Shipping = product.Shipping ?? string.Empty;
+            Exchange = product.Exchange ?? string.Empty;
+            Weight = product.Weight ?? string.Empty;
         }
     }
+
+    private static string SexLabelFromCode(string code) => code switch
+    {
+        "male" => "Самец",
+        "female" => "Самка",
+        "incubation-female" => "Инкубация под самку",
+        "incubation-male" => "Инкубация под самца",
+        "unknown" => "Неопределённо",
+        _ => string.Empty
+    };
+
+    private static string SexCodeFromLabel(string label) => label switch
+    {
+        "Самец" => "male",
+        "Самка" => "female",
+        "Инкубация под самку" => "incubation-female",
+        "Инкубация под самца" => "incubation-male",
+        "Неопределённо" => "unknown",
+        _ => string.Empty
+    };
+
+    private static string? TrimToNull(string value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
+    private static string CityFromAddress(string address)
+    {
+        var comma = address.IndexOf(',');
+        var city = (comma > 0 ? address[..comma] : address).Trim();
+        return city.StartsWith("г. ", StringComparison.OrdinalIgnoreCase) ? city[3..].Trim() : city;
+    }
+
+    private static string AgeFromHatch(DateTime? hatch, bool approx)
+    {
+        if (hatch is null)
+        {
+            return "—";
+        }
+
+        var months = (int)((DateTime.Today - hatch.Value.Date).TotalDays / 30.4);
+        var text = months < 1
+            ? "меньше месяца"
+            : months < 24
+                ? $"{months} мес"
+                : $"{months / 12} {Plural(months / 12, "год", "года", "лет")}";
+        return approx ? $"≈ {text}" : text;
+    }
+
+    private static string Plural(int n, string one, string few, string many) =>
+        n % 10 == 1 && n % 100 != 11 ? one : n % 10 is >= 2 and <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many;
 
     private void GoBack()
     {
@@ -165,11 +467,138 @@
 
     private void OnSave()
     {
-        Navigation.NavigateTo("/my-products");
+        var hatch = HatchDate ?? DateTime.Today;
+        var sex = SexLabelFromCode(Sex);
+
+        if (IsEdit)
+        {
+            var existing = Store.Get(Id!.Value);
+            if (existing is null)
+            {
+                Navigation.NavigateTo("/my-products");
+                return;
+            }
+
+            Store.Update(existing with
+            {
+                Species = Species,
+                Morph = Morph,
+                Price = Price ?? 0,
+                City = CityFromAddress(Address),
+                Address = Address,
+                Sex = sex,
+                Description = Description,
+                HatchDate = hatch,
+                Diet = TrimToNull(Diet),
+                Breeding = TrimToNull(Breeding),
+                Shipping = TrimToNull(Shipping),
+                Exchange = TrimToNull(Exchange),
+                Weight = TrimToNull(Weight)
+            });
+
+            Navigation.NavigateTo($"/my-product/{Id}");
+            return;
+        }
+
+        var saved = Store.Add(new DemoProduct(
+            0,
+            Species,
+            Morph,
+            Price ?? 0,
+            CityFromAddress(Address),
+            Address,
+            sex,
+            AgeFromHatch(HatchDate, HatchApprox),
+            Description,
+            hatch,
+            TrimToNull(Diet),
+            TrimToNull(Breeding),
+            TrimToNull(Shipping),
+            TrimToNull(Exchange),
+            TrimToNull(Weight)));
+
+        Navigation.NavigateTo($"/my-product/{saved.Id}");
     }
 
     private void OnDelete()
     {
+        if (Id.HasValue)
+        {
+            Store.Delete(Id.Value);
+        }
+
         Navigation.NavigateTo("/my-products");
+    }
+
+    private void OpenMap()
+    {
+        _selfRef ??= DotNetObjectReference.Create(this);
+        MapHint = "Кликните по карте или перетащите метку";
+        MapOpen = true;
+        _mapPending = true;
+    }
+
+    private async Task OnSearch()
+    {
+        var found = await JS.InvokeAsync<string?>("ReptileMap.search", SearchQuery);
+        if (found is not null)
+        {
+            Address = found;
+            MapHint = found;
+        }
+        else
+        {
+            MapHint = "Ничего не найдено — уточните запрос";
+        }
+    }
+
+    private async Task CloseMap()
+    {
+        MapOpen = false;
+        await JS.InvokeVoidAsync("ReptileMap.close");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_mapPending)
+        {
+            _mapPending = false;
+            await JS.InvokeVoidAsync("ReptileMap.open", _selfRef, "reptile-address-map", _pickedLat, _pickedLon);
+        }
+    }
+
+    [JSInvokable]
+    public Task OnPicked(string address, double lat, double lon)
+    {
+        Address = address;
+        _pickedLat = lat;
+        _pickedLon = lon;
+        MapHint = address;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _selfRef?.Dispose();
+        try
+        {
+            await JS.InvokeVoidAsync("ReptileMap.close");
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (InvalidOperationException)
+        {
+        }
+    }
+}
+erationException)
+        {
+        }
+    }
+}
+   {
+        }
     }
 }

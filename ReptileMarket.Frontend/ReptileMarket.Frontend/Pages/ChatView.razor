@@ -1,0 +1,128 @@
+@page "/chats/{Id:int}"
+@implements IDisposable
+@inject AccountState Account
+@inject ChatStore Store
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>@(Chat?.SellerName ?? "Чат") — ReptileMarket</PageTitle>
+
+<div class="catalog-page">
+    @if (Chat is not null)
+    {
+        <div class="chat-card">
+            <div class="chat-head">
+                <button class="chat-back" type="button" aria-label="Назад к чатам" title="Назад к чатам"
+                        @onclick='() => Navigation.NavigateTo("/chats")'>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+                <span class="chat-avatar" aria-hidden="true">@(Chat.SellerName.Length > 0 ? Chat.SellerName[..1].ToUpperInvariant() : "?")</span>
+                <span class="chat-head-info">
+                    <span class="chat-head-name">@Chat.SellerName</span>
+                    @if (Chat.ProductId > 0)
+                    {
+                        <a class="chat-head-species chat-head-link" href="/product/@Chat.ProductId?from=chats" title="Перейти к объявлению">
+                            @Chat.Species
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                <polyline points="15 3 21 3 21 9" />
+                                <line x1="10" y1="14" x2="21" y2="3" />
+                            </svg>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="chat-head-species">@Chat.Species</span>
+                    }
+                </span>
+            </div>
+
+            <div class="chat-body" @ref="_body">
+                @foreach (var message in Chat.Messages)
+                {
+                    <div class="bubble-row @(message.FromMe ? "out" : "in")">
+                        <div class="bubble @(message.FromMe ? "bubble-out" : "bubble-in")">
+                            <span class="bubble-text">@message.Text</span>
+                            <span class="bubble-time">@ChatFormat.Time(message.Time)</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <form class="chat-form" @onsubmit="Send" @onsubmit:preventDefault>
+                <input class="chat-input" type="text" placeholder="Написать сообщение…" maxlength="1000"
+                       aria-label="Текст сообщения" @bind="_draft" @bind:event="oninput" />
+                <button class="chat-send" type="submit" aria-label="Отправить" disabled="@string.IsNullOrWhiteSpace(_draft)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Chat? Chat;
+    private string _draft = string.Empty;
+    private ElementReference _body;
+    private bool _scrollPending;
+
+    protected override void OnInitialized()
+    {
+        if (!Account.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Chat = Store.Get(Id);
+        if (Chat is null)
+        {
+            Navigation.NavigateTo("/chats");
+            return;
+        }
+
+        _scrollPending = true;
+        Store.Changed += OnStoreChanged;
+    }
+
+    private void OnStoreChanged()
+    {
+        _scrollPending = true;
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_scrollPending || _body.Id is null)
+        {
+            return;
+        }
+
+        _scrollPending = false;
+        await JS.InvokeVoidAsync("rmChatScrollToEnd", _body);
+    }
+
+    private void Send()
+    {
+        var text = _draft.Trim();
+        if (text.Length == 0)
+        {
+            return;
+        }
+
+        _draft = string.Empty;
+        Store.SendMessage(Id, text);
+    }
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+    }
+}

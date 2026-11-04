@@ -1,0 +1,107 @@
+@if (Open)
+{
+    <div class="addr-modal" @onclick="CloseAsync">
+        <div class="filters-card" @onclick:stopPropagation="true">
+            <div class="addr-head">
+                <span>Фильтры</span>
+                <button class="addr-close" type="button" aria-label="Закрыть" @onclick="CloseAsync">&times;</button>
+            </div>
+
+            <div class="filters-grid">
+                <div class="fgroup">
+                    <span class="fgroup-title">Цена, ₽</span>
+                    <div class="frow">
+                        <input class="pform-control" type="number" min="0" placeholder="от" @bind="PriceFrom" />
+                        <span class="fdash">—</span>
+                        <input class="pform-control" type="number" min="0" placeholder="до" @bind="PriceTo" />
+                    </div>
+                </div>
+
+                <div class="fgroup">
+                    <span class="fgroup-title">Вид</span>
+                    <select class="pform-control" @bind="Species">
+                        <option value="">Любой</option>
+                        @foreach (var species in SpeciesList)
+                        {
+                            <option value="@species">@species</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="fgroup">
+                    <span class="fgroup-title">Морфа</span>
+                    <input class="pform-control" type="text" placeholder="Любая" @bind="Morph" />
+                </div>
+
+                <div class="fgroup">
+                    <span class="fgroup-title">Пол</span>
+                    <select class="pform-control" @bind="Sex">
+                        <option value="">Любой</option>
+                        <option value="male">Самец</option>
+                        <option value="female">Самка</option>
+                        <option value="incubation-female">Инкубация под самку</option>
+                        <option value="incubation-male">Инкубация под самца</option>
+                        <option value="unknown">Неопределённо</option>
+                    </select>
+                </div>
+
+                <div class="fgroup">
+                    <span class="fgroup-title">Возраст (дата вылупления)</span>
+                    <div class="frow">
+                        <DateField @bind-Value="DateFrom" Placeholder="от" />
+                        <span class="fdash">—</span>
+                        <DateField @bind-Value="DateTo" Placeholder="до" />
+                    </div>
+                </div>
+
+                <div class="fgroup">
+                    <span class="fgroup-title">Адрес</span>
+                    <input class="pform-control" type="text" placeholder="Город, улица" @bind="Address" />
+                </div>
+            </div>
+
+            <div class="addr-foot">
+                <button class="btn btn-outline" type="button" @onclick="Reset">Сбросить</button>
+                <button class="btn btn-primary" type="button" @onclick="CloseAsync">Показать результаты</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private int? PriceFrom { get; set; }
+    private int? PriceTo { get; set; }
+    private string Species { get; set; } = string.Empty;
+    private string Morph { get; set; } = string.Empty;
+    private string Sex { get; set; } = string.Empty;
+    private DateTime? DateFrom { get; set; }
+    private DateTime? DateTo { get; set; }
+    private string Address { get; set; } = string.Empty;
+
+    private static readonly string[] SpeciesList =
+    [
+        "Гемитеконникс", "Эублефар", "Бананоед", "Фельзума", "Королевский питон",
+        "Бородатая агама", "Маисовый полоз", "Йеменский хамелеон", "Королевская змея",
+        "Токи", "Нефрус", "Черепахи"
+    ];
+
+    private Task CloseAsync() => OpenChanged.InvokeAsync(false);
+
+    private void Reset()
+    {
+        PriceFrom = null;
+        PriceTo = null;
+        Species = string.Empty;
+        Morph = string.Empty;
+        Sex = string.Empty;
+        DateFrom = null;
+        DateTo = null;
+        Address = string.Empty;
+    }
+}

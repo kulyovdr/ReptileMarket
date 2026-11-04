@@ -17,7 +17,7 @@
         <div class="cat-grid">
             @foreach (var category in VisibleCategories)
             {
-                <a class="cat-card" href="/category/@category.Slug">
+                <a class="cat-card" href="@($"/catalog?species={Uri.EscapeDataString(category.Name)}")">
                     <div class="cat-photo"></div>
                     <span class="cat-name">@category.Name</span>
                 </a>

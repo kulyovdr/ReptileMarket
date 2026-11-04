@@ -1,5 +1,239 @@
 @page "/catalog"
+@inject ProductStore Store
+@inject NavigationManager Navigation
 
 <PageTitle>Каталог — ReptileMarket</PageTitle>
 
-<InProgress Title="Каталог" />
+<div class="catalog-page">
+    <div class="section-inner catalog-layout">
+        <button class="btn btn-outline catalog-filters-toggle" type="button" aria-expanded="@(_filtersOpen ? "true" : "false")"
+                @onclick="() => _filtersOpen = !_filtersOpen">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            @_filtersText
+        </button>
+
+        <aside class="catalog-filters @(_filtersOpen ? "open" : "")">
+            <div class="fgroup">
+                <span class="fgroup-title">Вид</span>
+                <select class="pform-control" @bind="Species">
+                    <option value="">Любой</option>
+                    @foreach (var species in SpeciesList)
+                    {
+                        <option value="@species">@species</option>
+                    }
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <span class="fgroup-title">Пол</span>
+                <select class="pform-control" @bind="Sex">
+                    <option value="">Любой</option>
+                    <option value="male">Самец</option>
+                    <option value="female">Самка</option>
+                    <option value="incubation-female">Инкубация под самку</option>
+                    <option value="incubation-male">Инкубация под самца</option>
+                    <option value="unknown">Неопределённо</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <span class="fgroup-title">Морфа</span>
+                <input class="pform-control" type="text" placeholder="Любая" @bind="Morph" />
+            </div>
+
+            <div class="fgroup">
+                <span class="fgroup-title">Возраст (дата вылупления)</span>
+                <div class="frow">
+                    <DateField @bind-Value="DateFrom" Placeholder="от" />
+                    <span class="fdash">—</span>
+                    <DateField @bind-Value="DateTo" Placeholder="до" />
+                </div>
+            </div>
+
+            <div class="fgroup">
+                <span class="fgroup-title">Цена, ₽</span>
+                <div class="frow">
+                    <input class="pform-control" type="number" min="0" placeholder="от" @bind="PriceFrom" />
+                    <span class="fdash">—</span>
+                    <input class="pform-control" type="number" min="0" placeholder="до" @bind="PriceTo" />
+                </div>
+            </div>
+
+            <div class="fgroup">
+                <span class="fgroup-title">Город</span>
+                <select class="pform-control" @bind="City">
+                    <option value="">Любой</option>
+                    @foreach (var city in CityList)
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
+            </div>
+
+            <button class="btn btn-outline catalog-apply" type="button" @onclick="Apply">Применить</button>
+            <button class="catalog-reset" type="button" @onclick="Reset">Сбросить</button>
+        </aside>
+
+        <div class="catalog-products">
+            @foreach (var product in Paged())
+            {
+                <div class="cat-tile" title="@($"{product.Species} {product.Morph} — {product.Price:N0} ₽")"
+                     @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=catalog")'></div>
+            }
+
+            @if (_result.Count == 0)
+            {
+                <p class="empty-state">Ничего не найдено. Попробуйте изменить фильтры.</p>
+            }
+        </div>
+    </div>
+
+    @if (_result.Count > PageSize)
+    {
+        <div class="pager">
+            <button class="pager-btn" type="button" aria-label="Назад" disabled="@(_page <= 1)" @onclick="PrevPage">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                </svg>
+            </button>
+            <button class="pager-btn" type="button" aria-label="Вперёд" disabled="@(_page >= PageCount)" @onclick="NextPage">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly string[] SpeciesList =
+    [
+        "Гемитеконникс", "Эублефар", "Бананоед", "Фельзума", "Королевский питон",
+        "Бородатая агама", "Маисовый полоз", "Йеменский хамелеон", "Королевская змея",
+        "Токи", "Нефрус", "Черепахи"
+    ];
+
+    private static readonly string[] CityList = ["Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск", "Краснодар"];
+
+    private string Species { get; set; } = string.Empty;
+    private string Sex { get; set; } = string.Empty;
+    private string Morph { get; set; } = string.Empty;
+    private DateTime? DateFrom { get; set; }
+    private DateTime? DateTo { get; set; }
+    private int? PriceFrom { get; set; }
+    private int? PriceTo { get; set; }
+    private string City { get; set; } = string.Empty;
+
+    private string ASpecies { get; set; } = string.Empty;
+    private string ASex { get; set; } = string.Empty;
+    private string AMorph { get; set; } = string.Empty;
+    private DateTime? ADateFrom { get; set; }
+    private DateTime? ADateTo { get; set; }
+    private int? APriceFrom { get; set; }
+    private int? APriceTo { get; set; }
+    private string ACity { get; set; } = string.Empty;
+
+    private bool _filtersOpen;
+    private string _filtersText => _filtersOpen ? "Скрыть фильтры" : "Фильтры";
+
+    private const int PageSize = 9;
+    private int _page = 1;
+    private List<DemoProduct> _result = [];
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(SpeciesParam) && SpeciesList.Contains(SpeciesParam, StringComparer.Ordinal))
+        {
+            Species = SpeciesParam;
+            ASpecies = SpeciesParam;
+            Refresh();
+        }
+        else if (!_initialized)
+        {
+            Refresh();
+        }
+        _initialized = true;
+    }
+
+    private bool _initialized;
+
+    [SupplyParameterFromQuery(Name = "species")]
+    public string? SpeciesParam { get; set; }
+
+    private int PageCount => Math.Max(1, (int)Math.Ceiling(_result.Count / (double)PageSize));
+
+    private IEnumerable<DemoProduct> Paged() => _result.Skip((_page - 1) * PageSize).Take(PageSize);
+
+    private void PrevPage()
+    {
+        if (_page > 1)
+        {
+            _page--;
+        }
+    }
+
+    private void NextPage()
+    {
+        if (_page < PageCount)
+        {
+            _page++;
+        }
+    }
+
+    private void Refresh()
+    {
+        _result = GetFiltered().ToList();
+        _page = 1;
+    }
+
+    private void Apply()
+    {
+        ASpecies = Species;
+        ASex = Sex;
+        AMorph = Morph;
+        ADateFrom = DateFrom;
+        ADateTo = DateTo;
+        APriceFrom = PriceFrom;
+        APriceTo = PriceTo;
+        ACity = City;
+        _filtersOpen = false;
+        Refresh();
+    }
+
+    private void Reset()
+    {
+        Species = string.Empty;
+        Sex = string.Empty;
+        Morph = string.Empty;
+        DateFrom = null;
+        DateTo = null;
+        PriceFrom = null;
+        PriceTo = null;
+        City = string.Empty;
+        Apply();
+    }
+
+    private IEnumerable<DemoProduct> GetFiltered()
+    {
+        return Store.Products.Where(p =>
+            (ASpecies == "" || p.Species == ASpecies) &&
+            (ASex == "" || SexMatches(ASex, p.Sex)) &&
+            (AMorph == "" || p.Morph.Contains(AMorph, StringComparison.OrdinalIgnoreCase)) &&
+            (ADateFrom == null || p.HatchDate >= ADateFrom.Value) &&
+            (ADateTo == null || p.HatchDate <= ADateTo.Value.Date) &&
+            (APriceFrom == null || p.Price >= APriceFrom.Value) &&
+            (APriceTo == null || p.Price <= APriceTo.Value) &&
+            (ACity == "" || p.City == ACity));
+    }
+
+    private static bool SexMatches(string code, string sex) => code switch
+    {
+        "male" => sex == "Самец",
+        "female" => sex == "Самка",
+        _ => false
+    };
+}

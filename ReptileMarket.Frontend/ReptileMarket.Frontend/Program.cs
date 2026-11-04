@@ -15,6 +15,7 @@ namespace ReptileMarket.Frontend
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddSingleton<AccountState>();
             builder.Services.AddSingleton<ProductStore>();
+            builder.Services.AddSingleton<ChatStore>();
 
             await builder.Build().RunAsync();
         }

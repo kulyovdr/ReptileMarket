@@ -1,5 +1,78 @@
 @page "/favorites"
+@implements IDisposable
+@inject AccountState Account
+@inject ProductStore Store
+@inject NavigationManager Navigation
 
 <PageTitle>Избранное — ReptileMarket</PageTitle>
 
-<InProgress Title="Избранное" />
+<div class="catalog-page">
+    <div class="products-toolbar">
+        <h1 class="products-title">Избранное</h1>
+    </div>
+
+    @if (Store.GetFavorites().Count == 0)
+    {
+        <p class="empty-state">
+            В избранном пока пусто. <a class="empty-state-link" href="/catalog">Перейти в каталог</a>
+        </p>
+    }
+    else
+    {
+        <div class="products-grid">
+            @foreach (var product in Store.GetFavorites())
+            {
+                <div class="product-card clickable" @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=favorites")'>
+                    <button class="fav-favorite active" type="button"
+                            title="@product.Species, @product.Price ₽ — двойное нажатие, чтобы убрать из избранного"
+                            aria-label="Убрать из избранного"
+                            @onclick:stopPropagation="true"
+                            @ondblclick:stopPropagation="true"
+                            @ondblclick="() => Store.ToggleFavorite(product.Id)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="pager">
+            <button class="pager-btn" type="button" aria-label="Назад" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                </svg>
+            </button>
+            <button class="pager-btn" type="button" aria-label="Вперёд" disabled>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (!Account.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        Store.Changed += OnStoreChanged;
+    }
+
+    private void OnStoreChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+    }
+}

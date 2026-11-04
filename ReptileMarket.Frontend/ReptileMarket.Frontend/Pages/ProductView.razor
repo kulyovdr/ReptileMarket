@@ -1,0 +1,236 @@
+@page "/product/{Id:int}"
+@page "/my-product/{Id:int}"
+@implements IDisposable
+@inject ProductStore Store
+@inject NavigationManager Navigation
+
+<PageTitle>@(Product is null ? "Товар" : $"{Product.Species} {Product.Morph}") — ReptileMarket</PageTitle>
+
+<div class="pform">
+    @if (Product is null)
+    {
+        <p class="empty-state">
+            Товар не найден.
+            <a class="empty-state-link" href="@BackHref">@BackText</a>
+        </p>
+    }
+    else
+    {
+        <div class="pform-card">
+            <div class="pform-topbar">
+                <button class="pform-back" type="button" aria-label="Назад" @onclick="GoBack">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12" />
+                        <polyline points="12 19 5 12 12 5" />
+                    </svg>
+                </button>
+                <span class="pv-spacer"></span>
+                @if (Mine)
+                {
+                    <button class="pv-icon-btn" type="button" aria-label="Редактировать товар" title="Редактировать"
+                            @onclick='() => Navigation.NavigateTo($"/edit-product/{Id}")'>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                        </svg>
+                    </button>
+                    <button class="pv-icon-btn pv-icon-btn-danger" type="button" aria-label="Удалить товар" title="Удалить"
+                            @onclick="DeleteProduct">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                        </svg>
+                    </button>
+                }
+                else
+                {
+                    <button class="pv-heart @(Store.IsFavorite(Id) ? "active" : "")" type="button"
+                            title="@(Store.IsFavorite(Id) ? "Убрать из избранного" : "Добавить в избранное")"
+                            aria-label="@(Store.IsFavorite(Id) ? "Убрать из избранного" : "Добавить в избранное")"
+                            @onclick="ToggleFavorite">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                        </svg>
+                    </button>
+                }
+            </div>
+
+            <div class="pform-top">
+                <div class="pform-photo">
+                    <span class="pform-photo-label">Photo</span>
+                    <div class="pform-photo-pages">
+                        @for (var page = 1; page <= 4; page++)
+                        {
+                            var pageNumber = page;
+                            <button class="pform-page @(pageNumber == PhotoPage ? "active" : "")"
+                                    type="button" @onclick="() => PhotoPage = pageNumber">@pageNumber</button>
+                        }
+                    </div>
+                </div>
+
+                <div class="pform-fields pv-fields">
+                    <div class="pfield">
+                        <span>Цена</span>
+                        <span class="pv-value">@($"{Product.Price:N0} ₽")</span>
+                    </div>
+                    <div class="pfield">
+                        <span>Адрес</span>
+                        <span class="pv-value">@Product.Address</span>
+                    </div>
+                    <div class="pfield">
+                        <span>Пол</span>
+                        <span class="pv-value">@Product.Sex</span>
+                    </div>
+                    <div class="pfield">
+                        <span>Возраст</span>
+                        <span class="pv-value">@Product.Age</span>
+                    </div>
+
+                    <div class="pform-sep" />
+
+                    <div class="pfield">
+                        <span>Вид</span>
+                        <span class="pv-value">@Product.Species</span>
+                    </div>
+                    <div class="pfield">
+                        <span>Морфа</span>
+                        <span class="pv-value">@Product.Morph</span>
+                    </div>
+                    <div class="pfield">
+                        <span>ID</span>
+                        <span class="pv-value">@Product.Id</span>
+                    </div>
+                    @if (Product.Diet is not null)
+                    {
+                        <div class="pfield">
+                            <span>Питание</span>
+                            <span class="pv-value">@Product.Diet</span>
+                        </div>
+                    }
+                    @if (Product.Breeding is not null)
+                    {
+                        <div class="pfield">
+                            <span>Разведение</span>
+                            <span class="pv-value">@Product.Breeding</span>
+                        </div>
+                    }
+                    @if (Product.Shipping is not null)
+                    {
+                        <div class="pfield">
+                            <span>Отправка</span>
+                            <span class="pv-value">@Product.Shipping</span>
+                        </div>
+                    }
+                    @if (Product.Exchange is not null)
+                    {
+                        <div class="pfield">
+                            <span>Обмен</span>
+                            <span class="pv-value">@Product.Exchange</span>
+                        </div>
+                    }
+                    @if (Product.Weight is not null)
+                    {
+                        <div class="pfield">
+                            <span>Вес</span>
+                            <span class="pv-value">@($"{Product.Weight} г")</span>
+                        </div>
+                    }
+                    @if (Product.Published is not null)
+                    {
+                        <div class="pfield">
+                            <span>Публикация</span>
+                            <span class="pv-value">@Product.Published.Value.ToString("dd.MM.yyyy")</span>
+                        </div>
+                    }
+
+                    <div class="pform-seller">
+                        <button class="btn btn-primary pv-seller-btn" type="button" @onclick="WriteSeller">Написать продавцу</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pv-description">@Product.Description</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private int PhotoPage = 1;
+
+    private DemoProduct? Product => Store.Get(Id);
+
+    private bool Mine { get; set; }
+
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    private string BackHref => Mine ? "/my-products" : From switch
+    {
+        "catalog" => "/catalog",
+        "chats" => "/chats",
+        _ => "/favorites"
+    };
+
+    private string BackText => Mine ? "К списку товаров" : From switch
+    {
+        "catalog" => "В каталог",
+        "chats" => "К чатам",
+        _ => "К избранному"
+    };
+
+    protected override void OnInitialized()
+    {
+        Mine = Navigation.ToBaseRelativePath(Navigation.Uri).StartsWith("my-product", StringComparison.OrdinalIgnoreCase);
+        Store.Changed += OnStoreChanged;
+    }
+
+    private void OnStoreChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleFavorite()
+    {
+        Store.ToggleFavorite(Id);
+    }
+
+    private void WriteSeller()
+    {
+    }
+
+    private void DeleteProduct()
+    {
+        Store.Delete(Id);
+        Navigation.NavigateTo("/my-products");
+    }
+
+    private void GoBack()
+    {
+        if (Mine)
+        {
+            Navigation.NavigateTo("/my-products");
+        }
+        else if (From == "catalog")
+        {
+            Navigation.NavigateTo("/catalog");
+        }
+        else if (From == "chats")
+        {
+            Navigation.NavigateTo("/chats");
+        }
+        else
+        {
+            Navigation.NavigateTo("/favorites");
+        }
+    }
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+    }
+}

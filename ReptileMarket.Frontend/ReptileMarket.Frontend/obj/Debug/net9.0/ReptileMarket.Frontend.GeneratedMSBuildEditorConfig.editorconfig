@@ -32,6 +32,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEF1dGhDYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Layout/DateField.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XERhdGVGaWVsZC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Layout/Footer.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEZvb3Rlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
@@ -48,8 +52,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Layout/SearchFilters.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XFNlYXJjaEZpbHRlcnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/Catalog.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0YWxvZy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/Chats.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2hhdHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/ChatView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2hhdFZpZXcucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/Favorites.razor]
@@ -74,6 +90,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/ProductForm.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdEZvcm0ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/ProductView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZHVjdFZpZXcucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/Profile.razor]
