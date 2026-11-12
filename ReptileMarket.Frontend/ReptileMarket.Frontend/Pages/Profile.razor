@@ -1,5 +1,6 @@
 @page "/profile"
 @inject AccountState Account
+@inject ProductStore Store
 @inject NavigationManager Navigation
 
 <PageTitle>Аккаунт — ReptileMarket</PageTitle>
@@ -19,11 +20,16 @@
 
         <div class="profile-body">
             <div class="profile-photo">
-                <button class="profile-photo-edit" type="button" aria-label="Изменить фото">
+                @if (PhotoUrl is not null)
+                {
+                    <img class="profile-photo-img" src="@PhotoUrl" alt="Фото профиля" />
+                }
+                <label class="profile-photo-edit" title="Изменить фото">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
                     </svg>
-                </button>
+                    <InputFile class="pform-file" OnChange="OnPhotoSelected" accept="image/*" />
+                </label>
             </div>
 
             <div class="profile-info">
@@ -34,15 +40,99 @@
             </div>
         </div>
     </div>
+
+    @if (Seller is not null)
+    {
+        <div class="profile-card seller-edit">
+            <div class="profile-head">
+                <h2 class="profile-title">Страница продавца</h2>
+                <a class="empty-state-link" href="/seller/@Seller.Id">Открыть витрину</a>
+            </div>
+
+            <div class="seller-edit-body">
+                <div class="seller-edit-photo">
+                    <span class="seller-avatar" aria-hidden="true">
+                        @if (PhotoUrl is not null)
+                        {
+                            <img class="seller-avatar-img" src="@PhotoUrl" alt="Фото продавца" />
+                        }
+                        else if (Seller.Name.Length > 0)
+                        {
+                            @Seller.Name[..1].ToUpperInvariant()
+                        }
+                    </span>
+                    <div class="seller-edit-photo-actions">
+                        <label class="btn btn-outline seller-photo-btn">
+                            Загрузить фото
+                            <InputFile class="pform-file" OnChange="OnPhotoSelected" accept="image/*" />
+                        </label>
+                        @if (PhotoUrl is not null)
+                        {
+                            <button class="btn btn-outline" type="button" @onclick="RemovePhoto">Удалить фото</button>
+                        }
+                    </div>
+                </div>
+
+                <div class="seller-edit-bio">
+                    <label class="fgroup-title" for="seller-bio">Описание профиля</label>
+                    <textarea id="seller-bio" class="pform-description seller-bio-input" maxlength="600"
+                              placeholder="Расскажите о себе и своём питомнике…"
+                              @bind="Bio"></textarea>
+                </div>
+            </div>
+
+            <div class="seller-edit-foot">
+                @if (_saved)
+                {
+                    <span class="seller-edit-saved">Сохранено</span>
+                }
+                <button class="btn btn-primary" type="button" @onclick="Save">Сохранить</button>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
+    private Seller? Seller => Store.GetSeller(Account.SellerId);
+
+    private string Bio = string.Empty;
+    private string? PhotoUrl;
+    private bool _saved;
+
     protected override void OnInitialized()
     {
         if (!Account.IsLoggedIn)
         {
             Navigation.NavigateTo("/login");
+            return;
         }
+
+        if (Seller is not null)
+        {
+            Bio = Seller.Bio;
+            PhotoUrl = Seller.PhotoUrl;
+        }
+    }
+
+    private async Task OnPhotoSelected(InputFileChangeEventArgs e)
+    {
+        using var stream = e.File.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        PhotoUrl = $"data:{e.File.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
+        _saved = false;
+    }
+
+    private void RemovePhoto()
+    {
+        PhotoUrl = null;
+        _saved = false;
+    }
+
+    private void Save()
+    {
+        Store.UpdateSellerProfile(Account.SellerId, Bio, PhotoUrl, removePhoto: PhotoUrl is null);
+        _saved = true;
     }
 
     private void OnLogout()

@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ReptileMarket.Frontend",
   "resources": {
-    "hash": "sha256-9NajvIQyRwe2d7hOzq5TzfXGFtBjsQHXPbl4rgxsflI=",
+    "hash": "sha256-fvy0hlf873gQJJNvbp8+mSCJk1QQoAMFXC5ig+GFpRc=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Authorization.pado7zd8rj.wasm": "Microsoft.AspNetCore.Authorization.wasm",
       "Microsoft.AspNetCore.Components.3i0p4bdcj3.wasm": "Microsoft.AspNetCore.Components.wasm",
@@ -201,8 +201,8 @@
       "icudt_CJK.tjcz0u77k5.dat": "icudt_CJK.dat",
       "icudt_EFIGS.tptq2av103.dat": "icudt_EFIGS.dat",
       "icudt_no_CJK.lfu7j35m59.dat": "icudt_no_CJK.dat",
-      "ReptileMarket.Frontend.wpa7wn1els.wasm": "ReptileMarket.Frontend.wasm",
-      "ReptileMarket.Frontend.qcpqzpdksw.pdb": "ReptileMarket.Frontend.pdb"
+      "ReptileMarket.Frontend.0sndmk95we.wasm": "ReptileMarket.Frontend.wasm",
+      "ReptileMarket.Frontend.yg1511ep4k.pdb": "ReptileMarket.Frontend.pdb"
     },
     "jsModuleNative": {
       "dotnet.native.fd55pqaqpk.js": "sha256-cyurmk3Ak+seyp/QVHpPtXEhK3hn1GmYBbg7VYc4tWk="
@@ -412,10 +412,10 @@
       "WindowsBase.ll5jdkzi4l.wasm": "sha256-568Y3yUiAkmTiVnZz2LPdlSOGDGMoH3CbBN4t61f1jg=",
       "mscorlib.6ezbo6ix47.wasm": "sha256-EihbmmHyEvHbCXZ4SOBvS3p/Xoj6k56xHlC7wbC3ank=",
       "netstandard.6wxbr1mb3t.wasm": "sha256-qsCpIsv1PQuJuKL7N9mLyODsTES4nqW/9NuGQ3FtWN8=",
-      "ReptileMarket.Frontend.wpa7wn1els.wasm": "sha256-/GE2NSWe4Vfa+c7xhnWztT+whzAojS9Y8ieJZI279H8="
+      "ReptileMarket.Frontend.0sndmk95we.wasm": "sha256-YNCmCpwhuS+c9cPMTcPgBIT0oB9Uo/LUH5EQesBVhqo="
     },
     "pdb": {
-      "ReptileMarket.Frontend.qcpqzpdksw.pdb": "sha256-JiaVB55bEEG13PhSKjdWvuWZIizdK8duJg5HK4jH7yQ="
+      "ReptileMarket.Frontend.yg1511ep4k.pdb": "sha256-TgQt6hkplAfSEuYIgxo+KkDX3h4z6UO2DCdXNhSb7Qw="
     }
   },
   "cacheBootResources": true,

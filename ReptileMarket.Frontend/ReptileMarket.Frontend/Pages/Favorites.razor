@@ -23,16 +23,24 @@
             @foreach (var product in Store.GetFavorites())
             {
                 <div class="product-card clickable" @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=favorites")'>
-                    <button class="fav-favorite active" type="button"
-                            title="@product.Species, @product.Price ₽ — двойное нажатие, чтобы убрать из избранного"
-                            aria-label="Убрать из избранного"
-                            @onclick:stopPropagation="true"
-                            @ondblclick:stopPropagation="true"
-                            @ondblclick="() => Store.ToggleFavorite(product.Id)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                        </svg>
-                    </button>
+                    <div class="product-photo">
+                        <button class="fav-favorite active" type="button"
+                                aria-label="Убрать из избранного"
+                                @onclick:stopPropagation="true"
+                                @onclick="() => Store.ToggleFavorite(product.Id)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="product-caption">
+                        <div class="product-name">@($"{product.Species} {product.Morph}")</div>
+                        <div class="product-city">@product.City</div>
+                        <div class="product-row">
+                            <span class="product-sex">@product.Sex, @product.Age</span>
+                            <span class="product-price">@($"{product.Price:N0} ₽")</span>
+                        </div>
+                    </div>
                 </div>
             }
         </div>

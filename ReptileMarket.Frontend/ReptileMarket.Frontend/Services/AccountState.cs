@@ -6,6 +6,8 @@ namespace ReptileMarket.Frontend.Services
 
         public string DisplayName { get; private set; } = string.Empty;
 
+        public int SellerId { get; } = 3;
+
         public event Action? Changed;
 
         public void Login(string displayName)

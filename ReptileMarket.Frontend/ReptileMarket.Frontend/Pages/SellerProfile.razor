@@ -1,0 +1,103 @@
+@page "/seller/{Id:int}"
+@implements IDisposable
+@inject ProductStore Store
+@inject NavigationManager Navigation
+
+<PageTitle>@(Seller?.Name ?? "Продавец") — ReptileMarket</PageTitle>
+
+<div class="catalog-page">
+    @if (Seller is null)
+    {
+        <p class="empty-state">
+            Продавец не найден. <a class="empty-state-link" href="/catalog">В каталог</a>
+        </p>
+    }
+    else
+    {
+        <div class="seller-card">
+            <span class="seller-avatar" aria-hidden="true">
+                @if (Seller.PhotoUrl is not null)
+                {
+                    <img class="seller-avatar-img" src="@Seller.PhotoUrl" alt="Фото продавца" />
+                }
+                else if (Seller.Name.Length > 0)
+                {
+                    @Seller.Name[..1].ToUpperInvariant()
+                }
+            </span>
+            <div class="seller-info">
+                <h1 class="seller-name">@Seller.Name</h1>
+                <div class="seller-meta">@Seller.City · на сайте с @Seller.Joined г. · @Products.Count в наличии</div>
+                <p class="seller-bio">@Seller.Bio</p>
+            </div>
+        </div>
+
+        <div class="products-toolbar seller-products-toolbar">
+            <h2 class="products-title">В продаже</h2>
+        </div>
+
+        @if (Products.Count == 0)
+        {
+            <p class="empty-state">У этого продавца пока нет товаров.</p>
+        }
+        else
+        {
+            <div class="products-grid">
+                @foreach (var product in Products)
+                {
+                    <div class="product-card clickable" @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=seller")'>
+                        <div class="product-photo">
+                            <button class="fav-favorite @(Store.IsFavorite(product.Id) ? "active" : "")" type="button"
+                                    aria-label="@(Store.IsFavorite(product.Id) ? "Убрать из избранного" : "В избранное")"
+                                    @onclick:stopPropagation="true"
+                                    @onclick="() => Store.ToggleFavorite(product.Id)">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="@(Store.IsFavorite(product.Id) ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="product-caption">
+                            <div class="product-name">@($"{product.Species} {product.Morph}")</div>
+                            <div class="product-city">@product.City</div>
+                            <div class="product-row">
+                                <span class="product-sex">@product.Sex, @product.Age</span>
+                                <span class="product-price">@($"{product.Price:N0} ₽")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Seller? Seller => Store.GetSeller(Id);
+
+    private List<DemoProduct> Products = [];
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        Store.Changed += OnStoreChanged;
+    }
+
+    private void Refresh()
+    {
+        Products = Store.GetBySeller(Id);
+    }
+
+    private void OnStoreChanged()
+    {
+        Refresh();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Store.Changed -= OnStoreChanged;
+    }
+}

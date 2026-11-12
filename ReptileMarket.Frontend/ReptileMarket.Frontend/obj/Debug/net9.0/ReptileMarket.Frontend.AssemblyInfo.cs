@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ReptileMarket.Frontend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5e89f9c5592d53d6e356cf6d0c19d4a5d530ce45")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1d15d17233fff9bb11da57f419d4096bc4dda27a")]
 [assembly: System.Reflection.AssemblyProductAttribute("ReptileMarket.Frontend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ReptileMarket.Frontend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

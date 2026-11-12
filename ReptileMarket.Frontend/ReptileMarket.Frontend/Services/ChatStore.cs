@@ -39,11 +39,11 @@
                 new(true, "Скиньте фото, пожалуйста.", DateTime.Today.AddDays(-6).AddHours(2))
             ], 5));
 
-            Chats.Add(new Chat(5, "Ольга", "Йеменский хамелеон",
+            Chats.Add(new Chat(5, "Ольга", "Фельзума",
             [
-                new(true, "Хамелеон самец или самка?", DateTime.Today.AddDays(-8)),
+                new(true, "Фельзума самец или самка?", DateTime.Today.AddDays(-8)),
                 new(false, "Самка, уже откладывала яйца.", DateTime.Today.AddDays(-8).AddHours(1))
-            ], 8));
+            ], 4));
         }
 
         public Chat? Get(int id) => Chats.FirstOrDefault(c => c.Id == id);

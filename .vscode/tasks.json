@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "stop old dev server",
+      "type": "shell",
+      "command": "$ErrorActionPreference='SilentlyContinue'; for ($i=0; $i -lt 20; $i++) { $pids = Get-NetTCPConnection -LocalPort 5009,7015 -State Listen | Select-Object -ExpandProperty OwningProcess -Unique; if (-not $pids) { break }; foreach ($procId in $pids) { taskkill /T /F /PID $procId | Out-Null }; Start-Sleep -Milliseconds 250 }",
+      "options": {
+        "shell": {
+          "executable": "powershell.exe",
+          "arguments": ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command"]
+        }
+      },
+      "presentation": {
+        "echo": false,
+        "reveal": "silent",
+        "close": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

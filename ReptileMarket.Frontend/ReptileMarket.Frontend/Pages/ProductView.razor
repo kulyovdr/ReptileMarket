@@ -2,6 +2,8 @@
 @page "/my-product/{Id:int}"
 @implements IDisposable
 @inject ProductStore Store
+@inject ChatStore Chats
+@inject AccountState Account
 @inject NavigationManager Navigation
 
 <PageTitle>@(Product is null ? "Товар" : $"{Product.Species} {Product.Morph}") — ReptileMarket</PageTitle>
@@ -58,23 +60,46 @@
             </div>
 
             <div class="pform-top">
-                <div class="pform-photo">
-                    <span class="pform-photo-label">Photo</span>
-                    <div class="pform-photo-pages">
-                        @for (var page = 1; page <= 4; page++)
-                        {
-                            var pageNumber = page;
-                            <button class="pform-page @(pageNumber == PhotoPage ? "active" : "")"
-                                    type="button" @onclick="() => PhotoPage = pageNumber">@pageNumber</button>
-                        }
+                <div class="pv-left">
+                    <div class="pform-photo">
+                        <span class="pform-photo-label">Photo</span>
+                        <div class="pform-photo-pages">
+                            @for (var page = 1; page <= 4; page++)
+                            {
+                                var pageNumber = page;
+                                <button class="pform-page @(pageNumber == PhotoPage ? "active" : "")"
+                                        type="button" @onclick="() => PhotoPage = pageNumber">@pageNumber</button>
+                            }
+                        </div>
                     </div>
+
+                    <div class="pv-description">@Product.Description</div>
                 </div>
 
                 <div class="pform-fields pv-fields">
-                    <div class="pfield">
-                        <span>Цена</span>
-                        <span class="pv-value">@($"{Product.Price:N0} ₽")</span>
+                    <h1 class="pv-title">@($"{Product.Species} {Product.Morph}")</h1>
+                    <div class="pv-subtitle">Объявление №@Product.Id</div>
+
+                    <div class="pv-price">@($"{Product.Price:N0} ₽")</div>
+
+                    <div class="pv-buy-row">
+                        <button class="btn btn-primary pv-buy-btn" type="button" @onclick="WriteSeller">Написать продавцу</button>
+                        @if (!Mine)
+                        {
+                            <button class="pv-seller-icon" type="button" aria-label="Профиль продавца" title="Профиль продавца"
+                                    @onclick="GoToSeller">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <circle cx="12" cy="8" r="4.2" />
+                                    <path d="M3.5 21.2c.5-4.6 4-7.2 8.5-7.2s8 2.6 8.5 7.2c.05.5-.35.8-.85.8h-15.3c-.5 0-.9-.3-.85-.8z" />
+                                </svg>
+                            </button>
+                        }
                     </div>
+
+                    <div class="pform-sep" />
+
+                    <div class="pv-details-title">Подробности</div>
+
                     <div class="pfield">
                         <span>Адрес</span>
                         <span class="pv-value">@Product.Address</span>
@@ -87,9 +112,6 @@
                         <span>Возраст</span>
                         <span class="pv-value">@Product.Age</span>
                     </div>
-
-                    <div class="pform-sep" />
-
                     <div class="pfield">
                         <span>Вид</span>
                         <span class="pv-value">@Product.Species</span>
@@ -97,10 +119,6 @@
                     <div class="pfield">
                         <span>Морфа</span>
                         <span class="pv-value">@Product.Morph</span>
-                    </div>
-                    <div class="pfield">
-                        <span>ID</span>
-                        <span class="pv-value">@Product.Id</span>
                     </div>
                     @if (Product.Diet is not null)
                     {
@@ -144,14 +162,8 @@
                             <span class="pv-value">@Product.Published.Value.ToString("dd.MM.yyyy")</span>
                         </div>
                     }
-
-                    <div class="pform-seller">
-                        <button class="btn btn-primary pv-seller-btn" type="button" @onclick="WriteSeller">Написать продавцу</button>
-                    </div>
                 </div>
             </div>
-
-            <div class="pv-description">@Product.Description</div>
         </div>
     }
 </div>
@@ -164,6 +176,8 @@
 
     private DemoProduct? Product => Store.Get(Id);
 
+    private Seller? Seller => Product is null ? null : Store.GetSeller(Product.SellerId);
+
     private bool Mine { get; set; }
 
     [SupplyParameterFromQuery(Name = "from")]
@@ -173,6 +187,7 @@
     {
         "catalog" => "/catalog",
         "chats" => "/chats",
+        "seller" => Seller is null ? "/catalog" : $"/seller/{Seller.Id}",
         _ => "/favorites"
     };
 
@@ -180,6 +195,7 @@
     {
         "catalog" => "В каталог",
         "chats" => "К чатам",
+        "seller" => "К продавцу",
         _ => "К избранному"
     };
 
@@ -199,8 +215,28 @@
         Store.ToggleFavorite(Id);
     }
 
+    private void GoToSeller()
+    {
+        if (Seller is not null)
+        {
+            Navigation.NavigateTo($"/seller/{Seller.Id}");
+        }
+    }
+
     private void WriteSeller()
     {
+        if (!Account.IsLoggedIn)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var seller = Seller;
+        var chat = Chats.Chats.FirstOrDefault(c => c.ProductId == Id)
+            ?? Chats.GetOrCreate(Chats.Chats.Count == 0 ? 1 : Chats.Chats.Max(c => c.Id) + 1,
+                seller?.Name ?? "Продавец", Product!.Species, Id);
+
+        Navigation.NavigateTo($"/chats/{chat.Id}");
     }
 
     private void DeleteProduct()

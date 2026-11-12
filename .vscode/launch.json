@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Сайт (http)",
+      "type": "blazorwasm",
+      "request": "launch",
+      "preLaunchTask": "stop old dev server",
+      "cwd": "${workspaceFolder}/ReptileMarket.Frontend/ReptileMarket.Frontend",
+      "url": "http://localhost:5009"
+    },
+    {
+      "name": "Сайт (https)",
+      "type": "blazorwasm",
+      "request": "launch",
+      "preLaunchTask": "stop old dev server",
+      "cwd": "${workspaceFolder}/ReptileMarket.Frontend/ReptileMarket.Frontend",
+      "url": "https://localhost:7015"
+    }
+  ]
+}

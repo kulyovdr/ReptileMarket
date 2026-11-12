@@ -104,6 +104,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVnaXN0ZXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/Pages/SellerProfile.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2VsbGVyUHJvZmlsZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/ReptileMarketProject/ReptileMarket.Frontend/ReptileMarket.Frontend/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 

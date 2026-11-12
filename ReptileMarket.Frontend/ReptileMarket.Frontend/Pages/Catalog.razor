@@ -79,8 +79,26 @@
         <div class="catalog-products">
             @foreach (var product in Paged())
             {
-                <div class="cat-tile" title="@($"{product.Species} {product.Morph} — {product.Price:N0} ₽")"
-                     @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=catalog")'></div>
+                <div class="cat-tile" @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=catalog")'>
+                    <div class="product-photo">
+                        <button class="fav-favorite @(Store.IsFavorite(product.Id) ? "active" : "")" type="button"
+                                aria-label="@(Store.IsFavorite(product.Id) ? "Убрать из избранного" : "В избранное")"
+                                @onclick:stopPropagation="true"
+                                @onclick="() => Store.ToggleFavorite(product.Id)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="@(Store.IsFavorite(product.Id) ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="product-caption">
+                        <div class="product-name">@($"{product.Species} {product.Morph}")</div>
+                        <div class="product-city">@product.City</div>
+                        <div class="product-row">
+                            <span class="product-sex">@product.Sex, @product.Age</span>
+                            <span class="product-price">@($"{product.Price:N0} ₽")</span>
+                        </div>
+                    </div>
+                </div>
             }
 
             @if (_result.Count == 0)
