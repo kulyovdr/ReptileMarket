@@ -12,8 +12,8 @@ namespace ReptileMarket.Frontend.Services
         }
 
         public int Id { get; init; }
-        public string Name { get; init; }
-        public string City { get; init; }
+        public string Name { get; set; }
+        public string City { get; set; }
         public string Bio { get; set; }
         public int Joined { get; init; }
         public string? PhotoUrl { get; set; }
@@ -99,6 +99,8 @@ namespace ReptileMarket.Frontend.Services
 
         public bool IsFavorite(int id) => _favorites.Contains(id);
 
+        public int FavoriteCount => Products.Count(p => _favorites.Contains(p.Id));
+
         public List<DemoProduct> GetFavorites() => Products.Where(p => _favorites.Contains(p.Id)).ToList();
 
         public DemoProduct? Get(int id) => Products.FirstOrDefault(p => p.Id == id);
@@ -128,7 +130,7 @@ namespace ReptileMarket.Frontend.Services
             Changed?.Invoke();
         }
 
-        public void UpdateSellerProfile(int sellerId, string bio, string? photoUrl, bool removePhoto = false)
+        public void UpdateSellerProfile(int sellerId, string bio, string? photoUrl, string city, string name, bool removePhoto = false)
         {
             var seller = GetSeller(sellerId);
             if (seller is null)
@@ -137,6 +139,16 @@ namespace ReptileMarket.Frontend.Services
             }
 
             seller.Bio = bio;
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                seller.Name = name.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(city))
+            {
+                seller.City = city.Trim();
+            }
+
             if (removePhoto)
             {
                 seller.PhotoUrl = null;

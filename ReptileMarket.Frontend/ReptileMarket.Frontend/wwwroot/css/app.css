@@ -4,6 +4,21 @@
 
 .invalid {
     outline: 1px solid red;
+    animation: field-shake 0.2s ease-out;
+}
+
+@keyframes field-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    75% {
+        transform: translateX(3px);
+    }
 }
 
 .validation-message {
@@ -47,7 +62,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ececeb;
+    background: #f2f2f1;
 }
 
 .app-loader-bar {

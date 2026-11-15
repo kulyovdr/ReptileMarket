@@ -1,6 +1,9 @@
 @implements IDisposable
 @inject AccountState Account
+@inject ProductStore Store
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+
 
 <header class="site-header">
     <div class="header-top">
@@ -13,7 +16,9 @@
                     <line x1="21" y1="21" x2="16.2" y2="16.2" />
                 </svg>
             </span>
-            <input type="search" placeholder="Найти на ReptileMarket" aria-label="Поиск" />
+            <input type="search" placeholder="Найти на ReptileMarket" aria-label="Поиск" autocomplete="off"
+                   @bind="_search" @bind:event="oninput" @onkeydown="OnSearchKeyDown"
+                   @onfocus="OnSearchFocus" @onblur="OnSearchBlur" />
             <span class="site-search-icon site-search-icon-right" role="button" tabindex="0" aria-label="Фильтры" title="Фильтры"
                   @onclick="() => FiltersOpen = true"
                   @onkeydown="@(async e => { if (e.Key == "Enter" || e.Key == " ") FiltersOpen = true; })">
@@ -26,6 +31,29 @@
                     <circle cx="7" cy="18" r="2.2" fill="#e7e5e2" />
                 </svg>
             </span>
+
+            @if (_historyOpen && _history.Count > 0)
+            {
+                <div class="search-suggest">
+                    <div class="search-suggest-head">
+                        <span>Раньше искали</span>
+                        <button type="button" @onclick:preventDefault="true" @onmousedown:preventDefault="true"
+                                @onclick="ClearHistory">Очистить</button>
+                    </div>
+                    @foreach (var item in _history)
+                    {
+                        <button class="search-suggest-item" type="button"
+                                @onmousedown:preventDefault="true"
+                                @onmousedown="() => PickHistory(item)">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="9" />
+                                <polyline points="12 7 12 12 15 14" />
+                            </svg>
+                            @item
+                        </button>
+                    }
+                </div>
+            }
         </div>
 
         <div class="header-actions">
@@ -69,6 +97,10 @@
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                         </svg>
                         Избранное
+                        @if (Store.FavoriteCount > 0)
+                        {
+                            <span class="nav-badge">@Store.FavoriteCount</span>
+                        }
                     </NavLink>
                     <NavLink class="nav-link" href="/my-products">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -106,6 +138,9 @@
 
 @code {
     private bool FiltersOpen;
+    private string _search = string.Empty;
+    private List<string> _history = [];
+    private bool _historyOpen;
 
     private ElementReference _navEl;
     private ElementReference _navLeftEl;
@@ -114,6 +149,9 @@
     protected override void OnInitialized()
     {
         Account.Changed += OnAccountChanged;
+        Store.Changed += OnStoreChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+        SyncSearchFromUrl();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -124,7 +162,92 @@
         }
     }
 
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            var q = _search.Trim();
+            _historyOpen = false;
+            await JS.InvokeVoidAsync("rmSearchHistory.add", q);
+            Navigation.NavigateTo(q.Length == 0 ? "/catalog" : $"/catalog?search={Uri.EscapeDataString(q)}");
+        }
+        else if (e.Key == "Escape")
+        {
+            _historyOpen = false;
+        }
+    }
+
+    private async Task OnSearchFocus()
+    {
+        try
+        {
+            _history = await JS.InvokeAsync<List<string>>("rmSearchHistory.get");
+        }
+        catch
+        {
+            _history = [];
+        }
+
+        _historyOpen = _history.Count > 0;
+    }
+
+    private void OnSearchBlur()
+    {
+        _historyOpen = false;
+    }
+
+    private async Task PickHistory(string item)
+    {
+        _search = item;
+        _historyOpen = false;
+        await JS.InvokeVoidAsync("rmSearchHistory.add", item);
+        Navigation.NavigateTo($"/catalog?search={Uri.EscapeDataString(item)}");
+    }
+
+    private async Task ClearHistory()
+    {
+        await JS.InvokeVoidAsync("rmSearchHistory.clear");
+        _history = [];
+        _historyOpen = false;
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        SyncSearchFromUrl();
+        StateHasChanged();
+    }
+
+    private void SyncSearchFromUrl()
+    {
+        var query = new Uri(Navigation.Uri).Query;
+        if (query.StartsWith('?'))
+        {
+            query = query[1..];
+        }
+
+        var search = string.Empty;
+        foreach (var part in query.Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var idx = part.IndexOf('=');
+            if (idx > 0 && part[..idx] == "search")
+            {
+                search = Uri.UnescapeDataString(part[(idx + 1)..]);
+                break;
+            }
+        }
+
+        if (!string.Equals(search, _search, StringComparison.Ordinal))
+        {
+            _search = search;
+        }
+    }
+
     private void OnAccountChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void OnStoreChanged()
     {
         _ = InvokeAsync(StateHasChanged);
     }
@@ -132,5 +255,7 @@
     public void Dispose()
     {
         Account.Changed -= OnAccountChanged;
+        Store.Changed -= OnStoreChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }

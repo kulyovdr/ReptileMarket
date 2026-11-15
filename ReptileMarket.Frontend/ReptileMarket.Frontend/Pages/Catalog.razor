@@ -5,6 +5,29 @@
 <PageTitle>Каталог — ReptileMarket</PageTitle>
 
 <div class="catalog-page">
+    <div class="section-inner catalog-toolbar">
+        <div class="catalog-toolbar-left">
+            <span class="catalog-count">Найдено: @_result.Count</span>
+            @if (!string.IsNullOrEmpty(ASearch))
+            {
+                <button class="search-chip" type="button" title="Убрать поиск" @onclick="ClearSearch">
+                    «@ASearch»
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            }
+        </div>
+        <select class="pform-control catalog-sort" aria-label="Сортировка" @bind="Sort" @bind:after="OnSortChanged">
+            <option value="">Сначала новые</option>
+            <option value="price-asc">Сначала дешёвые</option>
+            <option value="price-desc">Сначала дорогие</option>
+            <option value="age-asc">Сначала младшие</option>
+            <option value="age-desc">Сначала старшие</option>
+        </select>
+    </div>
+
     <div class="section-inner catalog-layout">
         <button class="btn btn-outline catalog-filters-toggle" type="button" aria-expanded="@(_filtersOpen ? "true" : "false")"
                 @onclick="() => _filtersOpen = !_filtersOpen">
@@ -76,7 +99,7 @@
             <button class="catalog-reset" type="button" @onclick="Reset">Сбросить</button>
         </aside>
 
-        <div class="catalog-products">
+        <div class="catalog-products" @key="_gridKey">
             @foreach (var product in Paged())
             {
                 <div class="cat-tile" @onclick='() => Navigation.NavigateTo($"/product/{product.Id}?from=catalog")'>
@@ -155,7 +178,11 @@
     private int? APriceTo { get; set; }
     private string ACity { get; set; } = string.Empty;
 
+    private string Sort { get; set; } = string.Empty;
+    private string ASearch { get; set; } = string.Empty;
+
     private bool _filtersOpen;
+    private int _gridKey;
     private string _filtersText => _filtersOpen ? "Скрыть фильтры" : "Фильтры";
 
     private const int PageSize = 9;
@@ -164,16 +191,38 @@
 
     protected override void OnParametersSet()
     {
+        var changed = false;
+
+        if (!string.IsNullOrWhiteSpace(SearchParam))
+        {
+            var search = SearchParam.Trim();
+            if (!string.Equals(ASearch, search, StringComparison.Ordinal))
+            {
+                ASearch = search;
+                changed = true;
+            }
+        }
+        else if (ASearch.Length != 0)
+        {
+            ASearch = string.Empty;
+            changed = true;
+        }
+
         if (!string.IsNullOrWhiteSpace(SpeciesParam) && SpeciesList.Contains(SpeciesParam, StringComparer.Ordinal))
         {
             Species = SpeciesParam;
-            ASpecies = SpeciesParam;
-            Refresh();
+            if (!string.Equals(ASpecies, SpeciesParam, StringComparison.Ordinal))
+            {
+                ASpecies = SpeciesParam;
+                changed = true;
+            }
         }
-        else if (!_initialized)
+
+        if (changed || !_initialized)
         {
             Refresh();
         }
+
         _initialized = true;
     }
 
@@ -181,6 +230,18 @@
 
     [SupplyParameterFromQuery(Name = "species")]
     public string? SpeciesParam { get; set; }
+
+    [SupplyParameterFromQuery(Name = "search")]
+    public string? SearchParam { get; set; }
+
+    private void OnSortChanged() => Refresh();
+
+    private void ClearSearch()
+    {
+        ASearch = string.Empty;
+        SearchParam = string.Empty;
+        Refresh();
+    }
 
     private int PageCount => Math.Max(1, (int)Math.Ceiling(_result.Count / (double)PageSize));
 
@@ -191,6 +252,7 @@
         if (_page > 1)
         {
             _page--;
+            _gridKey++;
         }
     }
 
@@ -199,6 +261,7 @@
         if (_page < PageCount)
         {
             _page++;
+            _gridKey++;
         }
     }
 
@@ -206,6 +269,7 @@
     {
         _result = GetFiltered().ToList();
         _page = 1;
+        _gridKey++;
     }
 
     private void Apply()
@@ -237,7 +301,7 @@
 
     private IEnumerable<DemoProduct> GetFiltered()
     {
-        return Store.Products.Where(p =>
+        var query = Store.Products.Where(p =>
             (ASpecies == "" || p.Species == ASpecies) &&
             (ASex == "" || SexMatches(ASex, p.Sex)) &&
             (AMorph == "" || p.Morph.Contains(AMorph, StringComparison.OrdinalIgnoreCase)) &&
@@ -246,6 +310,24 @@
             (APriceFrom == null || p.Price >= APriceFrom.Value) &&
             (APriceTo == null || p.Price <= APriceTo.Value) &&
             (ACity == "" || p.City == ACity));
+
+        if (!string.IsNullOrEmpty(ASearch))
+        {
+            query = query.Where(p =>
+                p.Species.Contains(ASearch, StringComparison.OrdinalIgnoreCase) ||
+                p.Morph.Contains(ASearch, StringComparison.OrdinalIgnoreCase) ||
+                p.City.Contains(ASearch, StringComparison.OrdinalIgnoreCase) ||
+                p.Description.Contains(ASearch, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Sort switch
+        {
+            "price-asc" => query.OrderBy(p => p.Price),
+            "price-desc" => query.OrderByDescending(p => p.Price),
+            "age-asc" => query.OrderByDescending(p => p.HatchDate),
+            "age-desc" => query.OrderBy(p => p.HatchDate),
+            _ => query.OrderByDescending(p => p.Published ?? p.HatchDate)
+        };
     }
 
     private static bool SexMatches(string code, string sex) => code switch

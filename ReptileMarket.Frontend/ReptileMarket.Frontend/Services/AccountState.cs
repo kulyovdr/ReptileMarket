@@ -17,6 +17,12 @@ namespace ReptileMarket.Frontend.Services
             Changed?.Invoke();
         }
 
+        public void SetName(string name)
+        {
+            DisplayName = name;
+            Changed?.Invoke();
+        }
+
         public void Logout()
         {
             IsLoggedIn = false;

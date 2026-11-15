@@ -9,93 +9,105 @@
     <div class="profile-card">
         <div class="profile-head">
             <h1 class="profile-title">Аккаунт</h1>
-            <button class="profile-logout" type="button" aria-label="Выйти" @onclick="OnLogout">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-            </button>
+            <div class="profile-head-actions">
+                @if (Seller is not null)
+                {
+                    <a class="profile-shop-link" href="/seller/@Seller.Id">Открыть витрину</a>
+                }
+                <button class="profile-logout" type="button" aria-label="Выйти" title="Выйти" @onclick="OnLogout">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <div class="profile-body">
-            <div class="profile-photo">
+            <div class="profile-photo-col">
+                <div class="profile-photo">
+                    @if (PhotoUrl is not null)
+                    {
+                        <img class="profile-photo-img" src="@PhotoUrl" alt="Фото профиля" />
+                    }
+                    else if (Name.Trim() is { Length: > 0 } displayName)
+                    {
+                        <span class="profile-photo-placeholder">@displayName[..1].ToUpperInvariant()</span>
+                    }
+                    <label class="profile-photo-edit" title="Изменить фото">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                        </svg>
+                        <InputFile class="pform-file" OnChange="OnPhotoSelected" accept="image/*" />
+                    </label>
+                </div>
                 @if (PhotoUrl is not null)
                 {
-                    <img class="profile-photo-img" src="@PhotoUrl" alt="Фото профиля" />
+                    <button class="profile-photo-remove" type="button" @onclick="RemovePhoto">Удалить фото</button>
                 }
-                <label class="profile-photo-edit" title="Изменить фото">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                    </svg>
-                    <InputFile class="pform-file" OnChange="OnPhotoSelected" accept="image/*" />
-                </label>
             </div>
 
-            <div class="profile-info">
-                <p class="profile-field"><span>Имя:</span> @(string.IsNullOrWhiteSpace(Account.DisplayName) ? "Anastasia" : Account.DisplayName)</p>
-                <p class="profile-field"><span>Логин:</span> Hansola</p>
-                <p class="profile-field"><span>Почта:</span> Bublefar@gmail.com</p>
-                <p class="profile-field"><span>Пароль:</span> ****************</p>
+            <div class="profile-form">
+                <div class="profile-field-row profile-field-edit">
+                    <label class="profile-label" for="profile-name">Имя</label>
+                    <input id="profile-name" class="pform-control" type="text" maxlength="40" @bind="Name" />
+                </div>
+                <div class="profile-field-row">
+                    <span class="profile-label">Логин</span>
+                    <span class="profile-value">Hansola</span>
+                </div>
+                <div class="profile-field-row">
+                    <span class="profile-label">Почта</span>
+                    <span class="profile-value">Bublefar@gmail.com</span>
+                </div>
+                <div class="profile-field-row">
+                    <span class="profile-label">Пароль</span>
+                    <span class="profile-value profile-value-masked">••••••••••••••••</span>
+                </div>
+                <div class="profile-field-row profile-field-edit">
+                    <label class="profile-label" for="profile-city">Город</label>
+                    <select id="profile-city" class="pform-control" @bind="City">
+                        @foreach (var city in CityList)
+                        {
+                            <option value="@city">@city</option>
+                        }
+                    </select>
+                </div>
             </div>
+        </div>
+
+        @if (Seller is not null)
+        {
+            <div class="profile-bio-section">
+                <div class="profile-bio-head">
+                    <h2 class="profile-subtitle">Описание профиля</h2>
+                    <span class="profile-bio-hint">Виден покупателям на вашей витрине</span>
+                </div>
+                <textarea id="seller-bio" class="pform-description seller-bio-input" maxlength="600"
+                          placeholder="Расскажите о себе и своём питомнике…"
+                          @bind="Bio"></textarea>
+            </div>
+        }
+
+        <div class="profile-foot">
+            @if (_saved)
+            {
+                <span class="seller-edit-saved">Изменения сохранены</span>
+            }
+            <button class="btn btn-primary" type="button" @onclick="Save">Сохранить</button>
         </div>
     </div>
-
-    @if (Seller is not null)
-    {
-        <div class="profile-card seller-edit">
-            <div class="profile-head">
-                <h2 class="profile-title">Страница продавца</h2>
-                <a class="empty-state-link" href="/seller/@Seller.Id">Открыть витрину</a>
-            </div>
-
-            <div class="seller-edit-body">
-                <div class="seller-edit-photo">
-                    <span class="seller-avatar" aria-hidden="true">
-                        @if (PhotoUrl is not null)
-                        {
-                            <img class="seller-avatar-img" src="@PhotoUrl" alt="Фото продавца" />
-                        }
-                        else if (Seller.Name.Length > 0)
-                        {
-                            @Seller.Name[..1].ToUpperInvariant()
-                        }
-                    </span>
-                    <div class="seller-edit-photo-actions">
-                        <label class="btn btn-outline seller-photo-btn">
-                            Загрузить фото
-                            <InputFile class="pform-file" OnChange="OnPhotoSelected" accept="image/*" />
-                        </label>
-                        @if (PhotoUrl is not null)
-                        {
-                            <button class="btn btn-outline" type="button" @onclick="RemovePhoto">Удалить фото</button>
-                        }
-                    </div>
-                </div>
-
-                <div class="seller-edit-bio">
-                    <label class="fgroup-title" for="seller-bio">Описание профиля</label>
-                    <textarea id="seller-bio" class="pform-description seller-bio-input" maxlength="600"
-                              placeholder="Расскажите о себе и своём питомнике…"
-                              @bind="Bio"></textarea>
-                </div>
-            </div>
-
-            <div class="seller-edit-foot">
-                @if (_saved)
-                {
-                    <span class="seller-edit-saved">Сохранено</span>
-                }
-                <button class="btn btn-primary" type="button" @onclick="Save">Сохранить</button>
-            </div>
-        </div>
-    }
 </div>
 
 @code {
+    private static readonly string[] CityList = ["Москва", "Санкт-Петербург", "Казань", "Екатеринбург", "Новосибирск", "Краснодар"];
+
     private Seller? Seller => Store.GetSeller(Account.SellerId);
 
+    private string Name = string.Empty;
     private string Bio = string.Empty;
+    private string City = CityList[0];
     private string? PhotoUrl;
     private bool _saved;
 
@@ -107,9 +119,12 @@
             return;
         }
 
+        Name = string.IsNullOrWhiteSpace(Account.DisplayName) ? "Anastasia" : Account.DisplayName;
+
         if (Seller is not null)
         {
             Bio = Seller.Bio;
+            City = Seller.City;
             PhotoUrl = Seller.PhotoUrl;
         }
     }
@@ -131,7 +146,9 @@
 
     private void Save()
     {
-        Store.UpdateSellerProfile(Account.SellerId, Bio, PhotoUrl, removePhoto: PhotoUrl is null);
+        var trimmedName = Name.Trim();
+        Store.UpdateSellerProfile(Account.SellerId, Bio, PhotoUrl, City, trimmedName, removePhoto: PhotoUrl is null);
+        Account.SetName(string.IsNullOrWhiteSpace(trimmedName) ? "Гость" : trimmedName);
         _saved = true;
     }
 

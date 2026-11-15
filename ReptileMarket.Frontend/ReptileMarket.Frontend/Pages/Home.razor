@@ -14,7 +14,7 @@
     <div class="section-inner">
         <h2 class="section-title">Категории</h2>
 
-        <div class="cat-grid">
+        <div class="cat-grid @(Expanded ? "cat-grid-expanded" : "")">
             @foreach (var category in VisibleCategories)
             {
                 <a class="cat-card" href="@($"/catalog?species={Uri.EscapeDataString(category.Name)}")">
@@ -38,7 +38,7 @@
     private bool Expanded { get; set; }
 
     private IEnumerable<Category> VisibleCategories =>
-        Expanded ? Categories : Categories.Take(4);
+        Expanded ? Categories : Categories.Take(8);
 
     private void ToggleCategories()
     {
